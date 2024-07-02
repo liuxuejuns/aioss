@@ -1,0 +1,28 @@
+站别+线别可以确定唯一一台AOI存储机器。
+
+T3	SMT_SPI(TOP)
+T9	SMT_SPI(BOT)
+
+TK	SMT_AOI(TOP)
+TL	SMT_AOI(BOT)
+
+
+在炉前，插件段，波峰焊的站别：
+T1	A区的DIP_AOI  
+TY	B区的DIP_AOI2&IPC Runin (Scan)
+
+
+在炉后，包装之前，总检的站别：
+OA	A区DIP_Final_AOI2 
+T1	B区DIP_Final_AOI
+IZ      FA_AOI
+A区DIP_Final_AOI2和B区DIP_Final_AOI、FA_AOI存储路径一样的。
+
+
+AXI测试产品（5DX,7600SII和7600SIII）都有两个站：
+FD	X-Ray Offline Sampling (AXI)
+FG	X-Ray Online-DIP (AXI)
+
+
+
+
