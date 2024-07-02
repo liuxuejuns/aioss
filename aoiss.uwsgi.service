@@ -1,0 +1,14 @@
+#aoiss is your user name, you replace it with your user name.
+[Unit]
+Description=uWSGI instance to serve aoiss
+After=syslog.target
+
+[Service]
+ExecStart=/bin/bash -c 'cd /home/aoiss/aoiss; source venv/bin/activate; uwsgi --ini aoiss_uwsgi.ini'
+User=aoiss
+Group=aoiss
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
