@@ -1,0 +1,83 @@
+﻿如果需要登录docker仓库服务器10.41.95.99，需要先从这个服务器上执行一个ping客户端的请求，成功后，客户端才能登录。
+
+tcs镜像存放我们部门的私有仓库中
+host：10.41.95.180
+user: admin
+passowrd: Harbor12345
+web url: http://10.41.95.180
+所有的使用到的镜像放在私有仓库的tcs项目中。
+root/TIDC1qaz
+
+
+开发的AOISS部署服务器10.41.95.85上。
+root/esrz30
+普通用户: aoiss
+密码：1234qwer!@#$QWER
+
+正式的AOISS部署新服务器10.41.242.38上。
+root/111111
+普通用户:aoiss
+密码:1234qwer!@#$QWER
+
+download docker image 从私有仓库
+1. docker login reg.swharbor.com
+user: admin
+passowrd: Harbor12345
+2. docker pull reg.swharbor.com/aoiss/aoiss_web:1.0
+3. docker pull reg.swharbor.com/aoiss/postgres:10
+4. docker pull reg.swharbor.com/aoiss/nginx:1.18
+
+上传系统代码：
+1. 在/home/aoiss/下新建目录aoiss。
+2. 上传系统代码到部署服务器上的/home/aoiss/aoiss/下。
+ 
+运行tcs系统tcsdb：
+1. 在/home/aoiss/aoiss/aoiss/docker/aoiss下执行以下命令：
+   docker-compose -f aoiss_aoiss.yml up -d
+2. 第一次需要创建数据库表和创建django admin user和password
+   docker exec -it aoiss-web /bin/bash    进入物理机
+   root@a262090ebca3:/# cd /aoiss/aoiss/aoiss
+   root@a262090ebca3:/aoiss/aoiss/aoiss# python manage.py migrate
+   root@a262090ebca3:/aoiss/aoiss/aoiss# python manage.py createsuperuser
+   
+   djang admin user: aoiss
+   djang admin password: 1234qwer!@#$QWER
+   
+   root@a262090ebca3:/aoiss/aoiss/aoiss# exit
+   
+
+
+
+clean
+su root
+
+rm -rf /aoiss/media/*
+cd /aoiss/aoiss/aoiss
+python manage.py shell
+
+from database.models import Stage, AOIStorageRecord, Connect,Line,ModelName,ComponentCoordinatesFile,Computer
+AOIStorageRecord.objects.all().delete()
+Line.objects.all().delete()
+ModelName.objects.all().delete()
+
+
+
+python /aoiss/aoiss/aoiss/website/backups_AOI_date_Tool/backups_AOI_date_Tool_main.pyw '4' '10.41.95.135'
+
+
+mount -t xfs /dev/mapper/mpatha /home/aoiss/aoiss/media/sda
+mount -t xfs /dev/mapper/mpathb /home/aoiss/aoiss/media/sdb
+mount -t xfs /dev/mapper/mpathc /home/aoiss/aoiss/media/sdc
+mount -t xfs /dev/mapper/mpathd /home/aoiss/aoiss/media/sdd
+
+/etc/fstab:
+/dev/mapper/mpatha    /home/aoiss/aoiss/media/sda    xfs    defaults    0 0
+/dev/mapper/mpathb    /home/aoiss/aoiss/media/sdb    xfs    defaults    0 0
+/dev/mapper/mpathc    /home/aoiss/aoiss/media/sdc    xfs    defaults    0 0
+/dev/mapper/mpathd    /home/aoiss/aoiss/media/sdd    xfs    defaults    0 0
+
+/dev/mapper/mpatha    /home/aoiss/aoiss/media/sda    xfs    defaults,_netdev    0 0
+/dev/mapper/mpathb    /home/aoiss/aoiss/media/sdb    xfs    defaults,_netdev    0 0
+/dev/mapper/mpathc    /home/aoiss/aoiss/media/sdc    xfs    defaults,_netdev    0 0
+/dev/mapper/mpathd    /home/aoiss/aoiss/media/sdd    xfs    defaults,_netdev    0 0
+

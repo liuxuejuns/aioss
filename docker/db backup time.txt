@@ -1,0 +1,4 @@
+物理机上执行以下命令：
+$crontab -e
+加入下面的配置，然后保存。确保容器已经运行。
+59 23 * * 0 /usr/bin/docker exec aoiss-postgres /bin/bash /aoiss/aoiss/docker/aoiss/aoiss/backup_aoiss_db.bash

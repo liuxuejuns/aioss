@@ -1,0 +1,55 @@
+# Use postgres/example user/password credentials
+# Use postgres/example user/password credentials
+version: '3'
+
+services:
+  aoiss-nginx-service:
+    container_name: aoiss-nginx
+    image: reg.swharbor.com/aoiss/nginx:1.18
+    restart: always
+    ports:
+      - 80:8300
+    volumes:                                                        #挂载，左边服务器，右边容器
+      - ./aoiss/aoiss_nginx.conf:/etc/nginx/conf.d/aoiss_nginx.conf #bind mount(将项目文件挂载到容器中)
+      - ../../aoiss/static:/aoiss/aoiss/aoiss/static #bind mount(将项目文件挂载到容器中)
+      - ../../../media:/aoiss/media #bind mount(将项目文件挂载到容器中)
+      - ../../../logs/aoiss/nginx:/var/log/nginx     #bind mount(将Nginx产生的log挂载到主机的log目录下)
+    command: [nginx, '-g', 'daemon off;']
+    depends_on:
+      - aoiss-web-service
+
+  aoiss-web-service:
+    container_name: aoiss-web
+    #build: ./aoiss
+    image: reg.swharbor.com/aoiss/aoiss_web:1.0
+    privileged: true
+    cap_add:
+      - ALL
+    restart: always   
+    command: uwsgi --ini /aoiss/aoiss/docker/aoiss/aoiss/aoiss_uwsgi.ini   
+    volumes:
+      - ../../aoiss:/aoiss/aoiss/aoiss
+      - ./aoiss:/aoiss/aoiss/docker/aoiss/aoiss
+      - ../../../media:/aoiss/media #bind mount(将项目文件挂载到容器中)
+      - ../../../logs/aoiss/django:/aoiss/logs/aoiss/django
+      - ../../../logs/aoiss/uwsgi:/aoiss/logs/aoiss/uwsgi    
+    depends_on:
+      - aoiss-postgres-service
+
+  aoiss-postgres-service:
+    container_name: aoiss-postgres
+    image: reg.swharbor.com/aoiss/postgres:10
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: '1234qwer!@#$$QWER'
+      # POSTGRES_USER: postgres
+      POSTGRES_DB: aoiss
+    ports:
+      - 8301:5432
+    volumes:
+      - ./aoiss:/aoiss/aoiss/docker/aoiss/aoiss
+      - ../../../media:/aoiss/media #bind mount(将项目文件挂载到容器中)
+      - pgdata:/var/lib/postgresql/data/   # pgdata被定义为：/var/lib/docker/volumes/aoiss_pgdata
+
+volumes:
+  pgdata:                        #定义pgdata(volume)数据卷(其生命周期独立于容器之外)
